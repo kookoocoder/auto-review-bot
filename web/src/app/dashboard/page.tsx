@@ -4,7 +4,49 @@ import { EditLink } from "@/components/edit-link";
 import { deleteBusiness, listBusinesses } from "@/lib/db";
 
 export default async function DashboardPage() {
-  const businesses = await listBusinesses();
+  let businesses: Awaited<ReturnType<typeof listBusinesses>> = [];
+  let loadError: string | null = null;
+
+  try {
+    businesses = await listBusinesses();
+  } catch (error) {
+    loadError =
+      error instanceof Error
+        ? error.message
+        : "Could not load businesses from Convex.";
+  }
+
+  if (loadError) {
+    return (
+      <main className="mx-auto w-full max-w-2xl space-y-4 px-6 py-10">
+        <h1 className="text-2xl font-semibold">Convex not ready</h1>
+        <p className="text-sm text-zinc-600">
+          The app could not reach your Convex backend. This usually means
+          functions are not deployed yet to your cloud project.
+        </p>
+        <pre className="overflow-x-auto rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-800">
+          {loadError}
+        </pre>
+        <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm text-zinc-700">
+          <p className="font-medium">Fix (run in the web folder):</p>
+          <ol className="mt-2 list-decimal space-y-1 pl-5">
+            <li>
+              <code>npx convex login</code>
+            </li>
+            <li>
+              <code>
+                npx convex dev --configure existing --project auto-review-bot
+                --dev-deployment cloud --once
+              </code>
+            </li>
+            <li>
+              Restart Next.js: <code>npm run dev</code>
+            </li>
+          </ol>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <main className="mx-auto w-full max-w-4xl space-y-6 px-6 py-10">
