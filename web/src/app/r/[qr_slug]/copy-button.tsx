@@ -1,0 +1,27 @@
+"use client";
+
+type Props = {
+  reviewText: string;
+  googleReviewUrl: string;
+};
+
+export function CopyButton({ reviewText, googleReviewUrl }: Props) {
+  async function onClick() {
+    try {
+      await navigator.clipboard.writeText(reviewText);
+    } catch {
+      // Manual fallback is the readonly textarea shown on screen.
+    }
+    window.location.href = googleReviewUrl;
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full rounded-md bg-zinc-900 px-4 py-3 text-sm font-medium text-white"
+    >
+      Copy & Open Google Reviews
+    </button>
+  );
+}
