@@ -19,7 +19,7 @@ export function CopyButton({ reviewText, googleReviewUrl }: Props) {
     <button
       type="button"
       onClick={onClick}
-      className="w-full rounded-md bg-zinc-900 px-4 py-3 text-sm font-medium text-white"
+      className="w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition-colors hover:bg-primary-hover"
     >
       Copy & Open Google Reviews
     </button>

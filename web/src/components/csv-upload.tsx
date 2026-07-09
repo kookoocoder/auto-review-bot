@@ -2,6 +2,7 @@
 
 import Papa from "papaparse";
 import { useRef, useState } from "react";
+import { IconUpload } from "@/components/icons";
 
 const MAX_TEXT_LENGTH = 300;
 const MIN_RECOMMENDED_ROWS = 15;
@@ -98,38 +99,41 @@ export function CsvUpload({ action }: Props) {
 
   return (
     <form ref={formRef} action={action} onSubmit={onSubmit} className="space-y-3">
-      <div className="rounded-lg border border-zinc-200 p-4">
-        <label className="block text-sm font-medium text-zinc-700">
-          Upload CSV
+      <div className="rounded-2xl border border-dashed border-border-strong bg-surface-muted/40 p-5">
+        <label className="flex cursor-pointer flex-col items-center text-center">
+          <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-primary-soft text-primary">
+            <IconUpload className="h-5 w-5" />
+          </div>
+          <span className="text-sm font-semibold text-navy">Import from CSV</span>
+          <span className="mt-1 text-xs text-muted">
+            One review per row. Use a <code className="text-navy">text</code>{" "}
+            column, or a single column with no header.
+          </span>
+          <input
+            type="file"
+            accept=".csv,text/csv"
+            onChange={onFileChange}
+            className="mt-3 block w-full max-w-xs text-sm text-muted file:mr-3 file:rounded-lg file:border file:border-border file:bg-surface file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-navy hover:file:bg-surface-muted"
+          />
         </label>
-        <p className="mt-1 text-xs text-zinc-500">
-          One review per row. Use a <code className="text-zinc-600">text</code>{" "}
-          column header, or a single column with no header.
-        </p>
-        <input
-          type="file"
-          accept=".csv,text/csv"
-          onChange={onFileChange}
-          className="mt-3 block w-full text-sm text-zinc-600 file:mr-3 file:rounded-md file:border file:border-zinc-200 file:bg-white file:px-3 file:py-1.5 file:text-sm file:font-medium file:text-zinc-700 hover:file:bg-zinc-50"
-        />
       </div>
 
       {isParsing ? (
-        <p className="text-sm text-zinc-500">Parsing CSV…</p>
+        <p className="text-sm text-muted">Parsing CSV…</p>
       ) : null}
 
       {parseError ? (
-        <p className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">
+        <p className="rounded-xl border border-red-200 bg-danger-soft px-3 py-2 text-sm text-danger">
           {parseError}
         </p>
       ) : null}
 
       {texts.length > 0 ? (
         <div className="space-y-2">
-          <p className="text-sm text-zinc-600">
+          <p className="text-sm text-muted">
             {fileName ? (
               <>
-                <span className="font-medium text-zinc-800">{fileName}</span>
+                <span className="font-medium text-navy">{fileName}</span>
                 {" · "}
               </>
             ) : null}
@@ -138,7 +142,7 @@ export function CsvUpload({ action }: Props) {
           </p>
 
           {showLowCountWarning ? (
-            <p className="rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            <p className="rounded-xl border border-amber-200 bg-warning-soft px-3 py-2 text-sm text-warning">
               Fewer than {MIN_RECOMMENDED_ROWS} lines uploaded. Add at least{" "}
               {MIN_RECOMMENDED_ROWS} varied lines for best rotation.
             </p>
@@ -151,7 +155,7 @@ export function CsvUpload({ action }: Props) {
       <button
         type="submit"
         disabled={texts.length === 0 || isParsing}
-        className="rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white disabled:cursor-not-allowed disabled:opacity-50"
+        className="inline-flex items-center justify-center rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover disabled:cursor-not-allowed disabled:opacity-50"
       >
         Import review lines
       </button>
