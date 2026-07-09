@@ -12,9 +12,12 @@ export async function listBusinesses() {
 }
 
 export async function createBusiness(formData: FormData) {
+  "use server";
   const name = String(formData.get("name") ?? "").trim();
   const placeOrUrl = String(formData.get("google_place_or_url") ?? "").trim();
-  if (!name || !placeOrUrl) return;
+  if (!name || !placeOrUrl) {
+    throw new Error("Business name and Google Place ID or review URL are required.");
+  }
 
   const client = getConvexClient();
   await client.mutation(api.businesses.create, {

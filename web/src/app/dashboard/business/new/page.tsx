@@ -11,10 +11,25 @@ import {
 } from "@/components/icons";
 import { createBusiness } from "@/lib/db";
 
-export default function NewBusinessPage() {
+export default async function NewBusinessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ error?: string }>;
+}) {
+  const params = await searchParams;
+  const error = params.error;
+
   async function onCreateBusiness(formData: FormData) {
     "use server";
-    await createBusiness(formData);
+    try {
+      await createBusiness(formData);
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Could not save business.";
+      redirect(
+        `/dashboard/business/new?error=${encodeURIComponent(message)}`,
+      );
+    }
     redirect("/dashboard");
   }
 
@@ -45,6 +60,12 @@ export default function NewBusinessPage() {
           Add your business details to get started.
         </p>
       </div>
+
+      {error ? (
+        <div className="rounded-2xl border border-red-200 bg-danger-soft px-4 py-3 text-sm text-danger">
+          {error}
+        </div>
+      ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
         <form
