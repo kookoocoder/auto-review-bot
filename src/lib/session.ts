@@ -55,9 +55,9 @@ export async function decryptSession(token: string): Promise<any | null> {
     const ciphertext = hexToArrayBuffer(ciphertextHex);
 
     const decrypted = await crypto.subtle.decrypt(
-      { name: "AES-GCM", iv },
+      { name: "AES-GCM", iv: iv as any },
       key,
-      ciphertext
+      ciphertext as any
     );
     const dec = new TextDecoder();
     return JSON.parse(dec.decode(decrypted));
