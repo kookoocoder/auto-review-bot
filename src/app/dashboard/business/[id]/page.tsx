@@ -22,10 +22,14 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getSession } from "@/lib/session";
 
 export default async function BusinessDetailPage(
   props: PageProps<"/dashboard/business/[id]">,
 ) {
+  const session = await getSession();
+  const isAdmin = session?.role === "admin";
+
   const { id } = await props.params;
   const business = await getBusiness(id);
   const services = await listServicesForBusiness(id);
@@ -52,15 +56,17 @@ export default async function BusinessDetailPage(
           <IconArrowLeft />
           Back to Businesses
         </Link>
-        <div className="flex gap-2">
-          <EditLink
-            href={`/dashboard/business/${id}/edit`}
-            label="Edit Business"
-          />
-          <form action={deleteBusiness.bind(null, id)}>
-            <DeleteButton label="Delete Business" />
-          </form>
-        </div>
+        {isAdmin && (
+          <div className="flex gap-2">
+            <EditLink
+              href={`/dashboard/business/${id}/edit`}
+              label="Edit Business"
+            />
+            <form action={deleteBusiness.bind(null, id)}>
+              <DeleteButton label="Delete Business" />
+            </form>
+          </div>
+        )}
       </div>
 
       <Card className="p-6 sm:p-8">
@@ -107,13 +113,15 @@ export default async function BusinessDetailPage(
               Each service has its own permanent QR link.
             </p>
           </div>
-          <Link
-            href={`/dashboard/business/${id}/service/new`}
-            className={cn(buttonVariants({ variant: "default" }), "inline-flex items-center gap-1.5")}
-          >
-            <IconPlus className="h-4 w-4" />
-            Add Service
-          </Link>
+          {isAdmin && (
+            <Link
+              href={`/dashboard/business/${id}/service/new`}
+              className={cn(buttonVariants({ variant: "default" }), "inline-flex items-center gap-1.5")}
+            >
+              <IconPlus className="h-4 w-4" />
+              Add Service
+            </Link>
+          )}
         </div>
 
         <div className="space-y-3">
@@ -149,15 +157,17 @@ export default async function BusinessDetailPage(
                   </div>
                   <IconChevronRight className="hidden h-4 w-4 text-muted-foreground sm:block" />
                 </Link>
-                <div className="flex shrink-0 items-center gap-1">
-                  <EditLink
-                    href={`/dashboard/service/${service._id}/edit`}
-                    variant="icon"
-                  />
-                  <form action={deleteService.bind(null, service._id, id)}>
-                    <DeleteButton label="Service" variant="icon" />
-                  </form>
-                </div>
+                {isAdmin && (
+                  <div className="flex shrink-0 items-center gap-1">
+                    <EditLink
+                      href={`/dashboard/service/${service._id}/edit`}
+                      variant="icon"
+                    />
+                    <form action={deleteService.bind(null, service._id, id)}>
+                      <DeleteButton label="Service" variant="icon" />
+                    </form>
+                  </div>
+                )}
               </Card>
             );
           })}
@@ -165,15 +175,19 @@ export default async function BusinessDetailPage(
           {services.length === 0 ? (
             <Card className="flex flex-col items-center justify-center border-dashed bg-muted/30 px-6 py-12 text-center">
               <p className="text-sm text-muted-foreground">
-                No services yet. Add one to generate a QR code.
+                {isAdmin
+                  ? "No services yet. Add one to generate a QR code."
+                  : "No services assigned to you yet."}
               </p>
-              <Link
-                href={`/dashboard/business/${id}/service/new`}
-                className={cn(buttonVariants({ variant: "default" }), "mt-4")}
-              >
-                <IconPlus className="h-4 w-4" />
-                Add Service
-              </Link>
+              {isAdmin && (
+                <Link
+                  href={`/dashboard/business/${id}/service/new`}
+                  className={cn(buttonVariants({ variant: "default" }), "mt-4")}
+                >
+                  <IconPlus className="h-4 w-4" />
+                  Add Service
+                </Link>
+              )}
             </Card>
           ) : null}
         </div>

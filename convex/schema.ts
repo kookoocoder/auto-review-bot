@@ -31,4 +31,20 @@ export default defineSchema({
     review_text_id: v.id("review_texts"),
     scanned_at: v.number(),
   }).index("by_service", ["service_id"]),
+
+  users: defineTable({
+    username: v.string(),
+    password_hash: v.string(), // Salted password hash
+    created_at: v.number(),
+  }),
+
+  assignments: defineTable({
+    user_id: v.id("users"),
+    target_id: v.union(v.id("businesses"), v.id("services")),
+    type: v.union(v.literal("business"), v.literal("service")),
+    created_at: v.number(),
+  })
+    .index("by_user", ["user_id"])
+    .index("by_target", ["target_id"])
+    .index("by_user_and_target", ["user_id", "target_id"]),
 });

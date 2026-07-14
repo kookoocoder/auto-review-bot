@@ -3,16 +3,67 @@ import { getConvexClient } from "@/lib/convex";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { buildGoogleReviewUrl } from "@/lib/utils";
+import { getSession } from "@/lib/session";
 
 const DEMO_OWNER_ID = process.env.DEMO_OWNER_ID ?? "demo-owner";
 
+async function requireSession() {
+  const session = await getSession();
+  if (!session) {
+    throw new Error("Unauthorized: No active session");
+  }
+  return session;
+}
+
 export async function listBusinesses() {
+  const session = await requireSession();
   const client = getConvexClient();
-  return client.query(api.businesses.list, { ownerId: DEMO_OWNER_ID });
+
+  if (session.role === "admin") {
+    return client.query(api.businesses.list, { ownerId: DEMO_OWNER_ID });
+  }
+
+  // Staff/User session: Return only businesses where assigned,
+  // or businesses where assigned to at least one service.
+  const allBusinesses = await client.query(api.businesses.list, { ownerId: DEMO_OWNER_ID });
+  const assignments = await client.query(api.assignments.listForUser, { userId: session.userId as any });
+
+  const assignedBusinessIds = new Set(
+    assignments
+      .filter((a) => a.type === "business")
+      .map((a) => a.target_id)
+  );
+
+  const assignedServiceIds = new Set(
+    assignments
+      .filter((a) => a.type === "service")
+      .map((a) => a.target_id)
+  );
+
+  const filteredBusinesses = [];
+  for (const business of allBusinesses) {
+    if (assignedBusinessIds.has(business._id)) {
+      filteredBusinesses.push(business);
+      continue;
+    }
+
+    const services = await client.query(api.services.listForBusiness, { businessId: business._id });
+    const hasAssignedService = services.some((service) => assignedServiceIds.has(service._id));
+    if (hasAssignedService) {
+      filteredBusinesses.push(business);
+    }
+  }
+
+  return filteredBusinesses;
 }
 
 export async function createBusiness(formData: FormData) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   const placeOrUrl = String(formData.get("google_place_or_url") ?? "").trim();
   if (!name || !placeOrUrl) {
@@ -30,6 +81,11 @@ export async function createBusiness(formData: FormData) {
 
 export async function updateBusiness(id: string, formData: FormData) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   const placeOrUrl = String(formData.get("google_place_or_url") ?? "").trim();
   if (!name || !placeOrUrl) return;
@@ -46,24 +102,88 @@ export async function updateBusiness(id: string, formData: FormData) {
 
 export async function deleteBusiness(id: string) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const client = getConvexClient();
   await client.mutation(api.businesses.remove, { id: id as Id<"businesses"> });
   redirect("/dashboard");
 }
 
 export async function getBusiness(id: string) {
+  const session = await requireSession();
   const client = getConvexClient();
-  return client.query(api.businesses.getById, { id: id as Id<"businesses"> });
+
+  const business = await client.query(api.businesses.getById, { id: id as Id<"businesses"> });
+  if (!business) return null;
+
+  if (session.role === "admin") {
+    return business;
+  }
+
+  // Staff check
+  const assignments = await client.query(api.assignments.listForUser, { userId: session.userId as any });
+  const isAssignedToBusiness = assignments.some(
+    (a) => a.type === "business" && a.target_id === id
+  );
+
+  if (isAssignedToBusiness) {
+    return business;
+  }
+
+  const services = await client.query(api.services.listForBusiness, { businessId: id as Id<"businesses"> });
+  const assignedServiceIds = new Set(
+    assignments
+      .filter((a) => a.type === "service")
+      .map((a) => a.target_id)
+  );
+
+  const hasAssignedService = services.some((service) => assignedServiceIds.has(service._id));
+  if (hasAssignedService) {
+    return business;
+  }
+
+  throw new Error("Forbidden: Access to this business is restricted.");
 }
 
 export async function listServicesForBusiness(businessId: string) {
+  const session = await requireSession();
   const client = getConvexClient();
-  return client.query(api.services.listForBusiness, {
+
+  const allServices = await client.query(api.services.listForBusiness, {
     businessId: businessId as Id<"businesses">,
   });
+
+  if (session.role === "admin") {
+    return allServices;
+  }
+
+  const assignments = await client.query(api.assignments.listForUser, { userId: session.userId as any });
+  const isAssignedToBusiness = assignments.some(
+    (a) => a.type === "business" && a.target_id === businessId
+  );
+
+  if (isAssignedToBusiness) {
+    return allServices;
+  }
+
+  const assignedServiceIds = new Set(
+    assignments
+      .filter((a) => a.type === "service")
+      .map((a) => a.target_id)
+  );
+
+  return allServices.filter((service) => assignedServiceIds.has(service._id));
 }
 
 export async function createService(businessId: string, formData: FormData) {
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
@@ -75,12 +195,43 @@ export async function createService(businessId: string, formData: FormData) {
 }
 
 export async function getService(id: string) {
+  const session = await requireSession();
   const client = getConvexClient();
-  return client.query(api.services.getById, { id: id as Id<"services"> });
+
+  const service = await client.query(api.services.getById, { id: id as Id<"services"> });
+  if (!service) return null;
+
+  if (session.role === "admin") {
+    return service;
+  }
+
+  const assignments = await client.query(api.assignments.listForUser, { userId: session.userId as any });
+  const isAssignedToService = assignments.some(
+    (a) => a.type === "service" && a.target_id === id
+  );
+
+  if (isAssignedToService) {
+    return service;
+  }
+
+  const isAssignedToBusiness = assignments.some(
+    (a) => a.type === "business" && a.target_id === service.business_id
+  );
+
+  if (isAssignedToBusiness) {
+    return service;
+  }
+
+  throw new Error("Forbidden: Access to this service is restricted.");
 }
 
 export async function updateService(id: string, formData: FormData) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const name = String(formData.get("name") ?? "").trim();
   if (!name) return;
 
@@ -94,6 +245,11 @@ export async function updateService(id: string, formData: FormData) {
 
 export async function deleteService(id: string, businessId: string) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const client = getConvexClient();
   await client.mutation(api.services.remove, { id: id as Id<"services"> });
   redirect(`/dashboard/business/${businessId}`);
@@ -105,7 +261,28 @@ export async function getServiceBySlug(slug: string) {
 }
 
 export async function listReviewTexts(serviceId: string) {
+  const session = await requireSession();
   const client = getConvexClient();
+
+  if (session.role !== "admin") {
+    const service = await client.query(api.services.getById, { id: serviceId as Id<"services"> });
+    if (!service) {
+      throw new Error("Service not found");
+    }
+
+    const assignments = await client.query(api.assignments.listForUser, { userId: session.userId as any });
+    const isAssignedToService = assignments.some(
+      (a) => a.type === "service" && a.target_id === serviceId
+    );
+    const isAssignedToBusiness = assignments.some(
+      (a) => a.type === "business" && a.target_id === service.business_id
+    );
+
+    if (!isAssignedToService && !isAssignedToBusiness) {
+      throw new Error("Forbidden: Access to this service is restricted.");
+    }
+  }
+
   return client.query(api.reviews.listForService, {
     serviceId: serviceId as Id<"services">,
   });
@@ -113,6 +290,11 @@ export async function listReviewTexts(serviceId: string) {
 
 export async function createReviewText(serviceId: string, formData: FormData) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return;
 
@@ -144,6 +326,11 @@ function parseReviewTextsFromFormData(formData: FormData): string[] {
 
 export async function importReviewTexts(serviceId: string, formData: FormData) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const texts = parseReviewTextsFromFormData(formData);
   if (texts.length === 0) return;
 
@@ -157,6 +344,11 @@ export async function importReviewTexts(serviceId: string, formData: FormData) {
 
 export async function updateReviewText(id: string, serviceId: string, formData: FormData) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const text = String(formData.get("text") ?? "").trim();
   if (!text) return;
 
@@ -170,6 +362,11 @@ export async function updateReviewText(id: string, serviceId: string, formData: 
 
 export async function deleteReviewText(id: string, serviceId: string) {
   "use server";
+  const session = await requireSession();
+  if (session.role !== "admin") {
+    throw new Error("Forbidden: Admin access required.");
+  }
+
   const client = getConvexClient();
   await client.mutation(api.reviews.remove, { id: id as Id<"review_texts"> });
   redirect(`/dashboard/service/${serviceId}`);

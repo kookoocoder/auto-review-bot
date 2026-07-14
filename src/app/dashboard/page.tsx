@@ -9,8 +9,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { getSession } from "@/lib/session";
 
 export default async function DashboardPage() {
+  const session = await getSession();
+  const isAdmin = session?.role === "admin";
+
   let businesses: Awaited<ReturnType<typeof listBusinesses>> = [];
   let loadError: string | null = null;
 
@@ -75,16 +79,18 @@ export default async function DashboardPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-foreground">Businesses</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Manage all your businesses in one place.
+            {isAdmin ? "Manage all your businesses in one place." : "Businesses assigned to you."}
           </p>
         </div>
-        <Link
-          href="/dashboard/business/new"
-          className={cn(buttonVariants({ variant: "default" }), "inline-flex items-center gap-1.5")}
-        >
-          <IconPlus className="h-4 w-4" />
-          New Business
-        </Link>
+        {isAdmin && (
+          <Link
+            href="/dashboard/business/new"
+            className={cn(buttonVariants({ variant: "default" }), "inline-flex items-center gap-1.5")}
+          >
+            <IconPlus className="h-4 w-4" />
+            New Business
+          </Link>
+        )}
       </div>
 
       <div className="space-y-3">
@@ -117,16 +123,18 @@ export default async function DashboardPage() {
                   {count} {count === 1 ? "Service" : "Services"}
                 </Badge>
               </Link>
-              <div className="flex shrink-0 items-center gap-1">
-                <EditLink
-                  href={`/dashboard/business/${business._id}/edit`}
-                  label="Edit Business"
-                  variant="icon"
-                />
-                <form action={deleteBusiness.bind(null, business._id)}>
-                  <DeleteButton label="Business" variant="icon" />
-                </form>
-              </div>
+              {isAdmin && (
+                <div className="flex shrink-0 items-center gap-1">
+                  <EditLink
+                    href={`/dashboard/business/${business._id}/edit`}
+                    label="Edit Business"
+                    variant="icon"
+                  />
+                  <form action={deleteBusiness.bind(null, business._id)}>
+                    <DeleteButton label="Business" variant="icon" />
+                  </form>
+                </div>
+              )}
             </Card>
           );
         })}
@@ -137,32 +145,38 @@ export default async function DashboardPage() {
               <IconStore className="h-6 w-6" />
             </div>
             <p className="text-sm font-medium text-muted-foreground">
-              No businesses yet. Create your first business to get started.
+              {isAdmin
+                ? "No businesses yet. Create your first business to get started."
+                : "No assigned businesses found."}
             </p>
-            <Link
-              href="/dashboard/business/new"
-              className={cn(buttonVariants({ variant: "default" }), "mt-5")}
-            >
-              <IconPlus className="h-4 w-4" />
-              New Business
-            </Link>
+            {isAdmin && (
+              <Link
+                href="/dashboard/business/new"
+                className={cn(buttonVariants({ variant: "default" }), "mt-5")}
+              >
+                <IconPlus className="h-4 w-4" />
+                New Business
+              </Link>
+            )}
           </Card>
         ) : (
-          <Card className="flex flex-col items-center justify-center border-dashed bg-muted/10 px-6 py-10 text-center">
-            <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
-              <IconStore className="h-5 w-5" />
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Add another business to manage more locations.
-            </p>
-            <Link
-              href="/dashboard/business/new"
-              className={cn(buttonVariants({ variant: "default" }), "mt-4")}
-            >
-              <IconPlus className="h-4 w-4" />
-              New Business
-            </Link>
-          </Card>
+          isAdmin && (
+            <Card className="flex flex-col items-center justify-center border-dashed bg-muted/10 px-6 py-10 text-center">
+              <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary/10 text-primary">
+                <IconStore className="h-5 w-5" />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Add another business to manage more locations.
+              </p>
+              <Link
+                href="/dashboard/business/new"
+                className={cn(buttonVariants({ variant: "default" }), "mt-4")}
+              >
+                <IconPlus className="h-4 w-4" />
+                New Business
+              </Link>
+            </Card>
+          )
         )}
       </div>
     </div>
