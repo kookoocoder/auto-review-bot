@@ -17,6 +17,11 @@ import {
   listServicesForBusiness,
 } from "@/lib/db";
 import { avatarColor, formatDate } from "@/lib/ui";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default async function BusinessDetailPage(
   props: PageProps<"/dashboard/business/[id]">,
@@ -27,8 +32,10 @@ export default async function BusinessDetailPage(
 
   if (!business) {
     return (
-      <div>
-        <p className="text-sm text-muted">Business not found.</p>
+      <div className="space-y-4">
+        <Alert variant="destructive">
+          <AlertDescription>Business not found.</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -40,7 +47,7 @@ export default async function BusinessDetailPage(
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-navy"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <IconArrowLeft />
           Back to Businesses
@@ -56,7 +63,7 @@ export default async function BusinessDetailPage(
         </div>
       </div>
 
-      <div className="rounded-2xl border border-border bg-surface p-6 sm:p-8">
+      <Card className="p-6 sm:p-8">
         <div className="flex flex-col items-start gap-6 sm:flex-row sm:items-center">
           <div
             className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full ${colors.bg} ${colors.text}`}
@@ -64,7 +71,7 @@ export default async function BusinessDetailPage(
             <IconStore className="h-9 w-9" />
           </div>
           <div className="min-w-0 flex-1">
-            <h1 className="text-3xl font-bold tracking-tight text-navy">
+            <h1 className="text-3xl font-bold tracking-tight text-foreground">
               {business.name}
             </h1>
             <a
@@ -76,33 +83,33 @@ export default async function BusinessDetailPage(
               {business.google_review_url}
               <IconExternal className="h-3.5 w-3.5" />
             </a>
-            <p className="mt-2 text-sm text-muted">
+            <p className="mt-2 text-sm text-muted-foreground">
               Created on {formatDate(business.created_at)}
-              <span className="mx-2 text-border-strong">·</span>
+              <span className="mx-2 text-border">·</span>
               {services.length} {services.length === 1 ? "Service" : "Services"}
             </p>
           </div>
         </div>
-        <div className="mt-6 rounded-xl border border-border bg-surface-muted/60 p-4">
-          <p className="text-sm font-semibold text-navy">About this business</p>
-          <p className="mt-1 text-sm leading-relaxed text-muted">
+        <Card className="mt-6 border-muted/50 bg-muted/30 p-4 shadow-none">
+          <p className="text-sm font-semibold text-foreground">About this business</p>
+          <p className="mt-1 text-sm leading-relaxed text-muted-foreground">
             Customers scan a service QR code, get a rotated review line, and are
             redirected to leave a Google review for this business.
           </p>
-        </div>
-      </div>
+        </Card>
+      </Card>
 
       <div>
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-navy">Services</h2>
-            <p className="mt-0.5 text-sm text-muted">
+            <h2 className="text-xl font-bold text-foreground">Services</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
               Each service has its own permanent QR link.
             </p>
           </div>
           <Link
             href={`/dashboard/business/${id}/service/new`}
-            className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary/20 hover:bg-primary-hover"
+            className={cn(buttonVariants({ variant: "default" }), "inline-flex items-center gap-1.5")}
           >
             <IconPlus className="h-4 w-4" />
             Add Service
@@ -113,9 +120,9 @@ export default async function BusinessDetailPage(
           {services.map((service) => {
             const serviceColors = avatarColor(service._id);
             return (
-              <div
+              <Card
                 key={service._id}
-                className="group flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-shadow hover:shadow-md hover:shadow-navy/5"
+                className="group flex flex-row items-center gap-4 p-4 transition-shadow hover:shadow-md"
               >
                 <Link
                   href={`/dashboard/service/${service._id}`}
@@ -128,19 +135,19 @@ export default async function BusinessDetailPage(
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-semibold text-navy group-hover:text-primary">
+                      <p className="font-semibold text-foreground group-hover:text-primary">
                         {service.name}
                       </p>
-                      <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-xs font-semibold text-success">
-                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                      <Badge variant="outline" className="gap-1 border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full px-2 py-0.5 text-xs font-semibold">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                         Active
-                      </span>
+                      </Badge>
                     </div>
-                    <p className="mt-0.5 font-mono text-sm text-muted">
+                    <p className="mt-0.5 font-mono text-sm text-muted-foreground">
                       /r/{service.qr_slug}
                     </p>
                   </div>
-                  <IconChevronRight className="hidden h-4 w-4 text-muted-light sm:block" />
+                  <IconChevronRight className="hidden h-4 w-4 text-muted-foreground sm:block" />
                 </Link>
                 <div className="flex shrink-0 items-center gap-1">
                   <EditLink
@@ -151,43 +158,43 @@ export default async function BusinessDetailPage(
                     <DeleteButton label="Service" variant="icon" />
                   </form>
                 </div>
-              </div>
+              </Card>
             );
           })}
 
           {services.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-border-strong bg-surface/60 px-6 py-12 text-center">
-              <p className="text-sm text-muted">
+            <Card className="flex flex-col items-center justify-center border-dashed bg-muted/30 px-6 py-12 text-center">
+              <p className="text-sm text-muted-foreground">
                 No services yet. Add one to generate a QR code.
               </p>
               <Link
                 href={`/dashboard/business/${id}/service/new`}
-                className="mt-4 inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+                className={cn(buttonVariants({ variant: "default" }), "mt-4")}
               >
                 <IconPlus className="h-4 w-4" />
                 Add Service
               </Link>
-            </div>
+            </Card>
           ) : null}
         </div>
       </div>
 
-      <div className="flex flex-col items-start justify-between gap-4 rounded-2xl border border-primary-muted/40 bg-primary-soft/50 p-5 sm:flex-row sm:items-center">
+      <Card className="flex flex-col items-start justify-between gap-4 border-primary/20 bg-primary/5 p-5 sm:flex-row sm:items-center">
         <div className="flex items-start gap-3">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
             <IconInfo className="h-4 w-4" />
           </div>
           <div>
-            <p className="font-semibold text-navy">
+            <p className="font-semibold text-foreground">
               Each service has its own QR code.
             </p>
-            <p className="mt-0.5 text-sm text-muted">
+            <p className="mt-0.5 text-sm text-muted-foreground">
               Download and print QR codes from each service page. Links never
               change.
             </p>
           </div>
         </div>
-      </div>
+      </Card>
     </div>
   );
 }

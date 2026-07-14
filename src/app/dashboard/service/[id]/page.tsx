@@ -25,6 +25,14 @@ import {
 } from "@/lib/db";
 import { generateQrAssets, getScanUrl } from "@/lib/qr";
 import { avatarColor, formatDate, formatDateTime } from "@/lib/ui";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Textarea } from "@/components/ui/textarea";
+import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 export default async function ServiceDetailPage(
   props: PageProps<"/dashboard/service/[id]">,
@@ -34,8 +42,10 @@ export default async function ServiceDetailPage(
 
   if (!service) {
     return (
-      <div>
-        <p className="text-sm text-muted">Service not found.</p>
+      <div className="space-y-4">
+        <Alert variant="destructive">
+          <AlertDescription>Service not found.</AlertDescription>
+        </Alert>
       </div>
     );
   }
@@ -79,7 +89,7 @@ export default async function ServiceDetailPage(
       <div className="flex flex-wrap items-center justify-between gap-3">
         <Link
           href={`/dashboard/business/${service.business_id}`}
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-navy"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <IconArrowLeft />
           Back to Business
@@ -101,15 +111,15 @@ export default async function ServiceDetailPage(
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <h1 className="text-3xl font-bold tracking-tight text-navy">
+              <h1 className="text-3xl font-bold tracking-tight text-foreground">
                 {service.name}
               </h1>
-              <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success">
-                <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              <Badge variant="outline" className="gap-1 border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full px-2 py-0.5 text-xs font-semibold">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
                 Active
-              </span>
+              </Badge>
             </div>
-            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted">
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
               <Link
                 href={`/r/${service.qr_slug}`}
                 className="inline-flex items-center gap-1 font-mono text-primary hover:underline"
@@ -123,7 +133,7 @@ export default async function ServiceDetailPage(
                   <IconStore className="h-3.5 w-3.5" />
                   <Link
                     href={`/dashboard/business/${business._id}`}
-                    className="font-medium text-navy hover:text-primary"
+                    className="font-medium text-foreground hover:text-primary"
                   >
                     {business.name}
                   </Link>
@@ -133,17 +143,17 @@ export default async function ServiceDetailPage(
           </div>
         </div>
 
-        <div className="rounded-2xl border border-primary-muted/50 bg-primary-soft/50 p-4 lg:min-w-[320px]">
+        <Card className="border-primary/20 bg-primary/5 p-4 lg:min-w-[320px]">
           <p className="text-xs font-semibold uppercase tracking-wide text-primary">
             QR Link (Permanent)
           </p>
-          <div className="mt-2 flex items-center gap-2 rounded-xl border border-border bg-surface px-3 py-2">
-            <p className="min-w-0 flex-1 truncate font-mono text-xs text-navy">
+          <div className="mt-2 flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
+            <p className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">
               {scanUrl}
             </p>
             <CopyButtonInline value={scanUrl} />
           </div>
-        </div>
+        </Card>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -152,51 +162,51 @@ export default async function ServiceDetailPage(
             label: "Total Scans",
             value: scanCount.toLocaleString(),
             icon: IconQr,
-            tone: "text-violet-600 bg-violet-100",
+            tone: "text-violet-600 bg-violet-100 dark:bg-violet-950/30",
           },
           {
             label: "Reviews Used",
             value: reviewTexts.filter((r) => r.used_count > 0).length.toLocaleString(),
             icon: IconMessage,
-            tone: "text-emerald-600 bg-emerald-100",
+            tone: "text-emerald-600 bg-emerald-100 dark:bg-emerald-950/30",
           },
           {
             label: "Total Reviews",
             value: reviewTexts.length.toLocaleString(),
             icon: IconMessage,
-            tone: "text-orange-600 bg-orange-100",
+            tone: "text-orange-600 bg-orange-100 dark:bg-orange-950/30",
           },
           {
             label: "Avg. Uses / Review",
             value: String(avgUses),
             icon: IconQr,
-            tone: "text-sky-600 bg-sky-100",
+            tone: "text-sky-600 bg-sky-100 dark:bg-sky-950/30",
           },
           {
             label: "Created On",
             value: formatDate(service.created_at),
             icon: IconStore,
-            tone: "text-violet-600 bg-violet-100",
+            tone: "text-violet-600 bg-violet-100 dark:bg-violet-950/30",
           },
         ].map((stat) => {
           const Icon = stat.icon;
           return (
-            <div
+            <Card
               key={stat.label}
-              className="rounded-2xl border border-border bg-surface p-4"
+              className="p-4 transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 border-border/80 hover:border-primary/20"
             >
               <div className="flex items-center justify-between">
-                <p className="text-xs font-medium text-muted">{stat.label}</p>
+                <p className="text-xs font-medium text-muted-foreground">{stat.label}</p>
                 <span
                   className={`flex h-8 w-8 items-center justify-center rounded-full ${stat.tone}`}
                 >
                   <Icon className="h-4 w-4" />
                 </span>
               </div>
-              <p className="mt-2 text-2xl font-bold tracking-tight text-navy">
+              <p className="mt-2 text-2xl font-bold tracking-tight text-foreground">
                 {stat.value}
               </p>
-            </div>
+            </Card>
           );
         })}
       </div>
@@ -209,9 +219,9 @@ export default async function ServiceDetailPage(
           serviceName={service.name}
         />
 
-        <section className="rounded-2xl border border-border bg-surface p-5">
+        <Card className="p-5">
           <div className="flex items-center justify-between">
-            <h2 className="text-base font-bold text-navy">Review Pool</h2>
+            <h2 className="text-base font-bold text-foreground">Review Pool</h2>
             <a
               href="#review-pool"
               className="text-xs font-semibold text-primary hover:underline"
@@ -220,235 +230,222 @@ export default async function ServiceDetailPage(
             </a>
           </div>
           <div className="mt-4 space-y-3">
-            <div className="rounded-xl bg-surface-muted/70 px-3 py-2.5">
-              <p className="text-xs text-muted">Total Reviews</p>
-              <p className="mt-0.5 text-lg font-bold text-navy">
+            <div className="rounded-xl bg-muted/30 px-3 py-2.5">
+              <p className="text-xs text-muted-foreground">Total Reviews</p>
+              <p className="mt-0.5 text-lg font-bold text-foreground">
                 {reviewTexts.length}
               </p>
             </div>
-            <div className="rounded-xl bg-surface-muted/70 px-3 py-2.5">
-              <p className="text-xs text-muted">Least Recently Used</p>
-              <p className="mt-0.5 line-clamp-2 text-sm font-medium text-navy">
+            <div className="rounded-xl bg-muted/30 px-3 py-2.5">
+              <p className="text-xs text-muted-foreground">Least Recently Used</p>
+              <p className="mt-0.5 line-clamp-2 text-sm font-medium text-foreground">
                 {leastRecentlyUsed?.text ?? "—"}
               </p>
             </div>
-            <div className="rounded-xl bg-surface-muted/70 px-3 py-2.5">
-              <p className="text-xs text-muted">Most Used</p>
-              <p className="mt-0.5 line-clamp-2 text-sm font-medium text-navy">
+            <div className="rounded-xl bg-muted/30 px-3 py-2.5">
+              <p className="text-xs text-muted-foreground">Most Used</p>
+              <p className="mt-0.5 line-clamp-2 text-sm font-medium text-foreground">
                 {mostUsed
                   ? `${mostUsed.text} (${mostUsed.used_count}×)`
                   : "—"}
               </p>
             </div>
-            <div className="rounded-xl bg-surface-muted/70 px-3 py-2.5">
-              <p className="text-xs text-muted">Last Updated</p>
-              <p className="mt-0.5 text-sm font-medium text-navy">
+            <div className="rounded-xl bg-muted/30 px-3 py-2.5">
+              <p className="text-xs text-muted-foreground">Last Updated</p>
+              <p className="mt-0.5 text-sm font-medium text-foreground">
                 {lastUpdated ? formatDateTime(lastUpdated) : "Never"}
               </p>
             </div>
           </div>
-        </section>
+        </Card>
 
-        <section className="rounded-2xl border border-border bg-surface p-5">
-          <h2 className="text-base font-bold text-navy">Pool Health</h2>
-          <p className="mt-1 text-sm text-muted">
+        <Card className="p-5">
+          <h2 className="text-base font-bold text-foreground">Pool Health</h2>
+          <p className="mt-1 text-sm text-muted-foreground">
             Aim for at least 15 varied review lines for best rotation.
           </p>
           <div className="mt-5">
             <div className="flex items-end justify-between">
-              <p className="text-3xl font-bold text-navy">
+              <p className="text-3xl font-bold text-foreground">
                 {reviewTexts.length >= 15 ? "Good" : "Low"}
               </p>
-              <p className="text-sm text-muted">
+              <p className="text-sm text-muted-foreground">
                 {reviewTexts.length} / 15 recommended
               </p>
             </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  reviewTexts.length >= 15 ? "bg-success" : "bg-warning"
-                }`}
-                style={{
-                  width: `${Math.min(100, (reviewTexts.length / 15) * 100)}%`,
-                }}
-              />
+            <div className="mt-3">
+              <Progress value={Math.min(100, (reviewTexts.length / 15) * 100)} />
             </div>
           </div>
           <Link
             href={`/r/${service.qr_slug}`}
-            className="mt-6 inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-semibold text-navy hover:bg-surface-muted"
+            className={cn(buttonVariants({ variant: "outline" }), "mt-6 w-full inline-flex items-center justify-center gap-1.5")}
           >
             Preview Public Page
             <IconExternal className="h-3.5 w-3.5" />
           </Link>
-        </section>
+        </Card>
       </div>
 
-      <div className="flex flex-col items-start justify-between gap-3 rounded-2xl border border-primary-muted/40 bg-primary-soft/50 p-5 sm:flex-row sm:items-center">
+      <Card className="border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <p className="font-semibold text-navy">Preview Customer Experience</p>
-          <p className="mt-0.5 text-sm text-muted">
+          <p className="font-semibold text-foreground">Preview Customer Experience</p>
+          <p className="mt-0.5 text-sm text-muted-foreground">
             See how your customers see the review page.
           </p>
         </div>
         <Link
           href={`/r/${service.qr_slug}`}
-          className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
+          className={cn(buttonVariants({ variant: "default" }), "inline-flex items-center gap-1.5")}
         >
           Preview Public Page
           <IconExternal className="h-3.5 w-3.5" />
         </Link>
-      </div>
+      </Card>
 
       <section id="review-pool" className="space-y-5">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-navy">Review Pool</h2>
-            <p className="mt-0.5 text-sm text-muted">
+            <h2 className="text-xl font-bold text-foreground">Review Pool</h2>
+            <p className="mt-0.5 text-sm text-muted-foreground">
               Manage the review text lines rotated for this service.
             </p>
           </div>
         </div>
 
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-border bg-surface p-4">
-            <p className="text-xs text-muted">Total Reviews</p>
-            <p className="mt-1 text-2xl font-bold text-navy">
+          <Card className="p-4">
+            <p className="text-xs text-muted-foreground">Total Reviews</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">
               {reviewTexts.length}
             </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-surface p-4">
-            <p className="text-xs text-muted">Least Recently Used</p>
-            <p className="mt-1 line-clamp-2 text-sm font-medium text-navy">
+          </Card>
+          <Card className="p-4">
+            <p className="text-xs text-muted-foreground">Least Recently Used</p>
+            <p className="mt-1 line-clamp-2 text-sm font-medium text-foreground">
               {leastRecentlyUsed
                 ? leastRecentlyUsed.last_used_at
                   ? formatDateTime(leastRecentlyUsed.last_used_at)
                   : "Never used"
                 : "—"}
             </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-surface p-4">
-            <p className="text-xs text-muted">Most Used</p>
-            <p className="mt-1 text-sm font-medium text-navy">
+          </Card>
+          <Card className="p-4">
+            <p className="text-xs text-muted-foreground">Most Used</p>
+            <p className="mt-1 text-sm font-medium text-foreground">
               {mostUsed ? `${mostUsed.used_count} times` : "—"}
             </p>
-          </div>
-          <div className="rounded-2xl border border-border bg-surface p-4">
-            <p className="text-xs text-muted">Last Updated</p>
-            <p className="mt-1 text-sm font-medium text-navy">
+          </Card>
+          <Card className="p-4">
+            <p className="text-xs text-muted-foreground">Last Updated</p>
+            <p className="mt-1 text-sm font-medium text-foreground">
               {lastUpdated ? formatDateTime(lastUpdated) : "Never"}
             </p>
-          </div>
+          </Card>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-2">
-          <div className="space-y-4 rounded-2xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-bold text-navy">Import from CSV</h3>
+          <Card className="space-y-4 p-5">
+            <h3 className="text-sm font-bold text-foreground">Import from CSV</h3>
             <CsvUpload action={onImportReviewTexts} />
-          </div>
-          <div className="space-y-4 rounded-2xl border border-border bg-surface p-5">
-            <h3 className="text-sm font-bold text-navy">Add Review</h3>
+          </Card>
+          <Card className="space-y-4 p-5">
+            <h3 className="text-sm font-bold text-foreground">Add Review</h3>
             <form action={onAddReviewText} className="space-y-3">
-              <textarea
+              <Textarea
                 name="text"
                 required
                 maxLength={300}
                 placeholder="Great service, staff was really helpful and quick."
-                className="min-h-28 w-full rounded-xl border border-border-strong p-3 text-sm text-navy outline-none placeholder:text-muted-light focus:border-primary focus:ring-2 focus:ring-primary/20"
+                className="min-h-28"
               />
-              <button
-                type="submit"
-                className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover"
-              >
+              <Button type="submit" className="inline-flex items-center gap-1.5">
                 <IconPlus className="h-4 w-4" />
                 Add Review
-              </button>
+              </Button>
             </form>
-          </div>
+          </Card>
         </div>
 
         {reviewTexts.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border-strong bg-surface/60 px-6 py-12 text-center">
-            <p className="text-sm text-muted">
+          <Card className="border-dashed bg-muted/30 px-6 py-12 text-center">
+            <p className="text-sm text-muted-foreground">
               No review lines yet. Add at least 15 varied lines for best
               rotation.
             </p>
-          </div>
+          </Card>
         ) : (
-          <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
-                <thead>
-                  <tr className="border-b border-border bg-surface-muted/50 text-xs font-semibold uppercase tracking-wide text-muted">
-                    <th className="px-4 py-3">#</th>
-                    <th className="px-4 py-3">Review Text</th>
-                    <th className="px-4 py-3">Used Count</th>
-                    <th className="px-4 py-3">Last Used</th>
-                    <th className="px-4 py-3">Status</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {reviewTexts.map((review, index) => (
-                    <tr
-                      key={review._id}
-                      className="border-b border-border last:border-0"
-                    >
-                      <td className="px-4 py-3 font-mono text-xs text-muted">
-                        {index + 1}
-                      </td>
-                      <td className="px-4 py-3">
-                        <form
-                          action={updateReviewText.bind(null, review._id, id)}
-                          className="flex items-start gap-2"
+          <Card className="overflow-hidden">
+            <Table className="min-w-[640px]">
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="w-12">#</TableHead>
+                  <TableHead>Review Text</TableHead>
+                  <TableHead className="w-28">Used Count</TableHead>
+                  <TableHead className="w-40">Last Used</TableHead>
+                  <TableHead className="w-28">Status</TableHead>
+                  <TableHead className="w-24 text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {reviewTexts.map((review, index) => (
+                  <TableRow key={review._id}>
+                    <TableCell className="font-mono text-xs text-muted-foreground">
+                      {index + 1}
+                    </TableCell>
+                    <TableCell>
+                      <form
+                        action={updateReviewText.bind(null, review._id, id)}
+                        className="flex items-start gap-2"
+                      >
+                        <Textarea
+                          name="text"
+                          required
+                          maxLength={300}
+                          defaultValue={review.text}
+                          className="min-h-[4.5rem] w-full min-w-[220px] bg-card"
+                        />
+                        <Button
+                          type="submit"
+                          variant="outline"
+                          size="xs"
+                          className="shrink-0"
                         >
-                          <textarea
-                            name="text"
-                            required
-                            maxLength={300}
-                            defaultValue={review.text}
-                            className="min-h-[4.5rem] w-full min-w-[220px] rounded-lg border border-border bg-surface px-2.5 py-2 text-sm text-navy outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
-                          />
-                          <button
-                            type="submit"
-                            className="shrink-0 rounded-lg border border-border px-2.5 py-1.5 text-xs font-semibold text-navy hover:bg-surface-muted"
-                          >
-                            Save
-                          </button>
-                        </form>
-                      </td>
-                      <td className="px-4 py-3 font-medium text-navy">
-                        {review.used_count}
-                      </td>
-                      <td className="px-4 py-3 text-muted">
-                        {review.last_used_at
-                          ? formatDateTime(review.last_used_at)
-                          : "Never"}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2 py-0.5 text-xs font-semibold text-success">
-                          <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                          Active
-                        </span>
-                      </td>
-                      <td className="px-4 py-3">
-                        <form
-                          action={deleteReviewText.bind(null, review._id, id)}
-                          className="flex justify-end"
-                        >
-                          <DeleteButton label="Review" variant="icon" />
-                        </form>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-            <div className="border-t border-border px-4 py-3 text-xs text-muted">
+                          Save
+                        </Button>
+                      </form>
+                    </TableCell>
+                    <TableCell className="font-medium text-foreground">
+                      {review.used_count}
+                    </TableCell>
+                    <TableCell className="text-muted-foreground">
+                      {review.last_used_at
+                        ? formatDateTime(review.last_used_at)
+                        : "Never"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline" className="gap-1 border-emerald-500/25 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 rounded-full px-2 py-0.5 text-xs font-semibold">
+                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                        Active
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <form
+                        action={deleteReviewText.bind(null, review._id, id)}
+                        className="flex justify-end"
+                      >
+                        <DeleteButton label="Review" variant="icon" />
+                      </form>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            <div className="border-t border-border px-4 py-3 text-xs text-muted-foreground">
               Showing {reviewTexts.length} review
               {reviewTexts.length === 1 ? "" : "s"}
             </div>
-          </div>
+          </Card>
         )}
       </section>
     </div>

@@ -10,6 +10,12 @@ import {
   IconX,
 } from "@/components/icons";
 import { createBusiness } from "@/lib/db";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Card } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/components/ui/input-group";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export default async function NewBusinessPage({
   searchParams,
@@ -38,14 +44,14 @@ export default async function NewBusinessPage({
       <div className="flex items-center justify-between">
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted transition-colors hover:text-navy"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
         >
           <IconArrowLeft />
           Back to Businesses
         </Link>
         <Link
           href="/dashboard"
-          className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-3.5 py-2 text-sm font-medium text-muted hover:bg-surface-muted"
+          className={cn(buttonVariants({ variant: "outline" }), "inline-flex items-center gap-1.5")}
         >
           <IconX />
           Cancel
@@ -53,116 +59,112 @@ export default async function NewBusinessPage({
       </div>
 
       <div>
-        <h1 className="text-3xl font-bold tracking-tight text-navy">
+        <h1 className="text-3xl font-bold tracking-tight text-foreground">
           Create New Business
         </h1>
-        <p className="mt-1 text-sm text-muted">
+        <p className="mt-1 text-sm text-muted-foreground">
           Add your business details to get started.
         </p>
       </div>
 
       {error ? (
-        <div className="rounded-2xl border border-red-200 bg-danger-soft px-4 py-3 text-sm text-danger">
-          {error}
-        </div>
+        <Alert variant="destructive">
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
       ) : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_320px]">
-        <form
-          action={onCreateBusiness}
-          className="space-y-5 rounded-2xl border border-border bg-surface p-6"
-        >
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold text-navy">
-              Business Name <span className="text-danger">*</span>
-            </span>
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-light">
-                <IconStore className="h-4 w-4" />
+        <Card className="p-6">
+          <form action={onCreateBusiness} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="business-name" className="text-sm font-semibold text-foreground">
+                Business Name <span className="text-destructive">*</span>
+              </Label>
+              <InputGroup>
+                <InputGroupAddon align="inline-start">
+                  <IconStore className="h-4 w-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="business-name"
+                  name="name"
+                  required
+                  maxLength={100}
+                  placeholder="Enter business name"
+                />
+              </InputGroup>
+              <span className="mt-1 block text-xs text-muted-foreground">
+                Use your official business name as it appears on Google.
               </span>
-              <input
-                name="name"
-                required
-                maxLength={100}
-                placeholder="Enter business name"
-                className="w-full rounded-xl border border-border-strong bg-surface py-2.5 pl-10 pr-3 text-sm text-navy outline-none transition-shadow placeholder:text-muted-light focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
             </div>
-            <span className="mt-1.5 block text-xs text-muted">
-              Use your official business name as it appears on Google.
-            </span>
-          </label>
 
-          <label className="block">
-            <span className="mb-1.5 block text-sm font-semibold text-navy">
-              Google Place ID or Review URL <span className="text-danger">*</span>
-            </span>
-            <div className="relative">
-              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-light">
-                <IconLink className="h-4 w-4" />
-              </span>
-              <input
-                name="google_place_or_url"
-                required
-                placeholder="Enter Google Place ID or full review URL"
-                className="w-full rounded-xl border border-border-strong bg-surface py-2.5 pl-10 pr-3 text-sm text-navy outline-none transition-shadow placeholder:text-muted-light focus:border-primary focus:ring-2 focus:ring-primary/20"
-              />
+            <div className="space-y-1.5">
+              <Label htmlFor="google-place" className="text-sm font-semibold text-foreground">
+                Google Place ID or Review URL <span className="text-destructive">*</span>
+              </Label>
+              <InputGroup>
+                <InputGroupAddon align="inline-start">
+                  <IconLink className="h-4 w-4" />
+                </InputGroupAddon>
+                <InputGroupInput
+                  id="google-place"
+                  name="google_place_or_url"
+                  required
+                  placeholder="Enter Google Place ID or full review URL"
+                />
+              </InputGroup>
+              <a
+                href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder"
+                target="_blank"
+                rel="noreferrer"
+                className="mt-1 inline-block text-xs font-medium text-primary hover:underline"
+              >
+                How to find your Google Place ID?
+              </a>
             </div>
-            <a
-              href="https://developers.google.com/maps/documentation/javascript/examples/places-placeid-finder"
-              target="_blank"
-              rel="noreferrer"
-              className="mt-1.5 inline-block text-xs font-medium text-primary hover:underline"
-            >
-              How to find your Google Place ID?
-            </a>
-          </label>
 
-          <button
-            type="submit"
-            className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm shadow-primary/20 transition-colors hover:bg-primary-hover"
-          >
-            <IconSave />
-            Save Business
-          </button>
-        </form>
+            <Button type="submit" className="inline-flex items-center gap-2">
+              <IconSave className="h-4 w-4" />
+              Save Business
+            </Button>
+          </form>
+        </Card>
 
         <div className="space-y-4">
-          <div className="rounded-2xl border border-border bg-surface p-5">
-            <p className="text-sm font-semibold text-navy">Preview</p>
+          <Card className="p-5">
+            <p className="text-sm font-semibold text-foreground">Preview</p>
             <div className="mt-4 flex flex-col items-center text-center">
-              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary-soft text-primary">
+              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-primary/10 text-primary">
                 <IconStore className="h-6 w-6" />
               </div>
-              <p className="mt-3 font-bold text-navy">Your Business Name</p>
-              <p className="mt-1 text-xs font-medium text-muted">Google Reviews</p>
-              <p className="mt-4 text-xs leading-relaxed text-muted">
+              <p className="mt-3 font-bold text-foreground">Your Business Name</p>
+              <p className="mt-1 text-xs font-medium text-muted-foreground">Google Reviews</p>
+              <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
                 This is how your business will appear to customers when they scan
                 your QR code.
               </p>
             </div>
-          </div>
+          </Card>
 
-          <div className="rounded-2xl border border-primary-muted/50 bg-primary-soft/60 p-5">
-            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-navy">
+          <Card className="border-primary/20 bg-primary/5 p-5">
+            <div className="mb-3 flex items-center gap-2 text-sm font-semibold text-foreground">
               <IconInfo className="h-4 w-4 text-primary" />
               What happens next?
             </div>
-            <ul className="space-y-2.5 text-sm text-muted">
+            <ul className="space-y-2.5 text-sm text-muted-foreground">
               {[
                 "You can add services after creating your business",
                 "Each service will have its own QR code",
                 "You can edit details anytime",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">
-                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-success text-white">
+                  <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-white dark:text-black">
                     <IconCheck className="h-2.5 w-2.5" />
                   </span>
                   {item}
                 </li>
               ))}
             </ul>
-          </div>
+          </Card>
         </div>
       </div>
     </div>

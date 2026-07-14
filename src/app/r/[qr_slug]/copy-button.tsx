@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/components/ui/button";
+
 type Props = {
   reviewText: string;
   googleReviewUrl: string;
@@ -16,12 +18,14 @@ export function CopyButton({ reviewText, googleReviewUrl }: Props) {
   }
 
   return (
-    <button
+    <Button
       type="button"
       onClick={onClick}
-      className="w-full rounded-xl bg-primary px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-primary/20 transition-colors hover:bg-primary-hover"
+      className="w-full"
+      size="lg"
     >
       Copy & Open Google Reviews
-    </button>
+    </Button>
   );
 }
+

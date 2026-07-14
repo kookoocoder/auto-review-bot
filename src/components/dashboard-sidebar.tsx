@@ -41,8 +41,8 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
               onClick={onNavigate}
               className={`flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
                 active
-                  ? "bg-primary-soft text-primary"
-                  : "text-muted hover:bg-surface-muted hover:text-navy"
+                  ? "bg-sidebar-accent text-sidebar-accent-foreground font-semibold"
+                  : "text-sidebar-foreground/70 hover:bg-sidebar-accent/50 hover:text-sidebar-foreground"
               }`}
             >
               <Icon className="h-5 w-5" />
@@ -51,7 +51,7 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
         <div
-          className="flex cursor-default items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-muted-light"
+          className="flex cursor-default items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-sidebar-foreground/45"
           title="Coming soon"
         >
           <IconGrid className="h-5 w-5" />
@@ -59,17 +59,17 @@ function SidebarNav({ onNavigate }: { onNavigate?: () => void }) {
         </div>
       </nav>
 
-      <div className="m-3 rounded-2xl border border-border bg-surface-muted p-4">
-        <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-primary-soft text-primary">
+      <div className="m-3 rounded-2xl border border-sidebar-border bg-sidebar-accent/40 p-4">
+        <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-sidebar-accent text-sidebar-accent-foreground">
           <IconQuestion className="h-4 w-4" />
         </div>
-        <p className="text-sm font-semibold text-navy">Need Help?</p>
-        <p className="mt-1 text-xs leading-relaxed text-muted">
+        <p className="text-sm font-semibold text-sidebar-foreground">Need Help?</p>
+        <p className="mt-1 text-xs leading-relaxed text-sidebar-foreground/70">
           Check our documentation or contact support.
         </p>
         <a
           href="mailto:support@qrreview.platform"
-          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-border bg-surface px-3 py-2 text-xs font-semibold text-navy transition-colors hover:bg-primary-soft hover:text-primary"
+          className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-sidebar-border bg-sidebar px-3 py-2 text-xs font-semibold text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
         >
           <IconHeadset className="h-3.5 w-3.5" />
           Contact Support
@@ -84,12 +84,12 @@ export function DashboardSidebar() {
 
   return (
     <>
-      <div className="flex items-center justify-between border-b border-border bg-surface px-4 py-3 lg:hidden">
+      <div className="flex items-center justify-between border-b border-sidebar-border bg-sidebar px-4 py-3 lg:hidden">
         <Logo href="/" compact />
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="rounded-xl border border-border px-3 py-2 text-sm font-semibold text-navy"
+          className="rounded-xl border border-sidebar-border bg-sidebar hover:bg-sidebar-accent px-3 py-2 text-sm font-semibold text-sidebar-foreground"
         >
           Menu
         </button>
@@ -100,15 +100,15 @@ export function DashboardSidebar() {
           <button
             type="button"
             aria-label="Close menu"
-            className="absolute inset-0 bg-navy/40"
+            className="absolute inset-0 bg-sidebar-foreground/40"
             onClick={() => setOpen(false)}
           />
-          <aside className="absolute left-0 top-0 flex h-full w-72 flex-col bg-surface shadow-xl">
+          <aside className="absolute left-0 top-0 flex h-full w-72 flex-col bg-sidebar border-r border-sidebar-border shadow-xl">
             <div className="flex justify-end p-3">
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-lg p-2 text-muted hover:bg-surface-muted"
+                className="rounded-lg p-2 text-sidebar-foreground/70 hover:bg-sidebar-accent"
               >
                 <IconX className="h-5 w-5" />
               </button>
@@ -118,9 +118,10 @@ export function DashboardSidebar() {
         </div>
       ) : null}
 
-      <aside className="hidden w-64 shrink-0 flex-col border-r border-border bg-surface lg:flex">
+      <aside className="hidden w-64 shrink-0 flex-col border-r border-sidebar-border bg-sidebar text-sidebar-foreground lg:flex">
         <SidebarNav />
       </aside>
     </>
   );
 }
+

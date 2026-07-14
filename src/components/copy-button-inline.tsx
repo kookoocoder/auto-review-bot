@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import { IconCopy } from "@/components/icons";
 
 type Props = {
@@ -22,13 +23,16 @@ export function CopyButtonInline({ value, className = "" }: Props) {
   }
 
   return (
-    <button
+    <Button
       type="button"
+      variant="ghost"
+      size="icon-sm"
       onClick={onCopy}
-      className={`inline-flex h-8 w-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary-soft ${className}`}
+      className={className}
       title={copied ? "Copied!" : "Copy"}
     >
       <IconCopy className="h-4 w-4" />
-    </button>
+    </Button>
   );
 }
+

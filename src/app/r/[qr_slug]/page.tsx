@@ -3,6 +3,8 @@ import { Logo } from "@/components/logo";
 import { IconStar } from "@/components/icons";
 import { getServiceBySlug, pickNextReviewText } from "@/lib/db";
 import { CopyButton } from "./copy-button";
+import { Card } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 export default async function PublicReviewPage(props: PageProps<"/r/[qr_slug]">) {
   const { qr_slug } = await props.params;
@@ -18,7 +20,7 @@ export default async function PublicReviewPage(props: PageProps<"/r/[qr_slug]">)
   const business = service.businesses;
 
   return (
-    <main className="relative flex min-h-screen flex-col bg-[#f7f8fc]">
+    <main className="relative flex min-h-screen flex-col bg-muted/30">
       <div
         aria-hidden
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(45,70,185,0.1),_transparent_55%)]"
@@ -29,27 +31,27 @@ export default async function PublicReviewPage(props: PageProps<"/r/[qr_slug]">)
           <Logo href={null} />
         </div>
 
-        <div className="rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-navy/5 sm:p-8">
+        <Card className="p-6 shadow-lg sm:p-8">
           <div className="mb-1 flex justify-center gap-1 text-gold">
             {[1, 2, 3, 4, 5].map((n) => (
               <IconStar key={n} className="h-5 w-5" />
             ))}
           </div>
-          <h1 className="mt-3 text-center text-2xl font-bold tracking-tight text-navy">
+          <h1 className="mt-3 text-center text-2xl font-bold tracking-tight text-foreground">
             {business.name}
           </h1>
-          <p className="mt-2 text-center text-sm text-muted">
+          <p className="mt-2 text-center text-sm text-muted-foreground">
             Tap the button to copy your review text, then paste it on Google.
           </p>
 
           <label className="mt-6 block">
-            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted">
+            <span className="mb-1.5 block text-xs font-semibold uppercase tracking-wide text-muted-foreground">
               Your review text
             </span>
-            <textarea
+            <Textarea
               readOnly
               value={textToShow}
-              className="min-h-36 w-full rounded-2xl border border-border-strong bg-surface-muted/50 p-4 text-sm leading-relaxed text-navy outline-none"
+              className="min-h-36 resize-none"
             />
           </label>
 
@@ -59,12 +61,13 @@ export default async function PublicReviewPage(props: PageProps<"/r/[qr_slug]">)
               googleReviewUrl={business.google_review_url}
             />
           </div>
-        </div>
+        </Card>
 
-        <p className="mt-6 text-center text-xs text-muted-light">
+        <p className="mt-6 text-center text-xs text-muted-foreground">
           Powered by QR Review Platform
         </p>
       </div>
     </main>
   );
 }
+
