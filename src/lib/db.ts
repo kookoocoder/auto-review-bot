@@ -148,6 +148,13 @@ export async function getBusiness(id: string) {
   throw new Error("Forbidden: Access to this business is restricted.");
 }
 
+export async function getPublicBusinessProfile(id: string) {
+  const client = getConvexClient();
+  return client.query(api.businesses.getPublicProfile, {
+    id,
+  });
+}
+
 export async function listServicesForBusiness(businessId: string) {
   const session = await requireSession();
   const client = getConvexClient();

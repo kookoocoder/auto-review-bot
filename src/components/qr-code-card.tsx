@@ -15,7 +15,7 @@ type Props = {
   scanUrl: string;
   pngDataUrl: string;
   svg: string;
-  serviceName: string;
+  name: string;
 };
 
 function downloadDataUrl(dataUrl: string, filename: string) {
@@ -35,8 +35,8 @@ function downloadSvg(svg: string, filename: string) {
   URL.revokeObjectURL(url);
 }
 
-export function QrCodeCard({ scanUrl, pngDataUrl, svg, serviceName }: Props) {
-  const safeName = serviceName.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
+export function QrCodeCard({ scanUrl, pngDataUrl, svg, name }: Props) {
+  const safeName = name.replace(/[^a-z0-9-_]+/gi, "-").toLowerCase();
 
   return (
     <Card>
@@ -50,7 +50,7 @@ export function QrCodeCard({ scanUrl, pngDataUrl, svg, serviceName }: Props) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={pngDataUrl}
-            alt={`QR code for ${serviceName}`}
+            alt={`QR code for ${name}`}
             width={200}
             height={200}
             className="h-[200px] w-[200px]"

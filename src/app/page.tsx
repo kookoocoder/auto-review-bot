@@ -83,9 +83,8 @@ export default function Home() {
               <span className="text-primary">Google</span> reviews with ease
             </h1>
             <p className="mt-5 max-w-lg text-base leading-relaxed text-muted-foreground sm:text-lg">
-              Create businesses, services, and static QR links that rotate review
-              text lines using least-recently-used logic before redirecting to
-              Google reviews.
+              Create one static QR code per business. Customers select their
+              service, copy a rotated review line, and continue to Google.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-3">
               <Link
@@ -193,7 +192,7 @@ export default function Home() {
               {
                 step: "02",
                 title: "Add services & reviews",
-                body: "Each service gets a permanent QR link and a pool of review text lines.",
+                body: "Your business gets one permanent QR code, while each service keeps its own review text pool.",
               },
               {
                 step: "03",
@@ -233,7 +232,7 @@ export default function Home() {
                   <span className="text-success">✓</span> Unlimited businesses
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-success">✓</span> Static QR per service
+                  <span className="text-success">✓</span> One static QR per business
                 </li>
                 <li className="flex gap-2">
                   <span className="text-success">✓</span> LRU review rotation
@@ -262,7 +261,7 @@ export default function Home() {
             {[
               {
                 q: "Do I need to reprint QR codes?",
-                a: "No. Each service QR link is permanent. You print once and keep using it.",
+                a: "No. Each business QR link is permanent. Services can change without reprinting it.",
               },
               {
                 q: "How does review rotation work?",

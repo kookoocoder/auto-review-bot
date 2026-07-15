@@ -1,9 +1,7 @@
 import Link from "next/link";
-import { CopyButtonInline } from "@/components/copy-button-inline";
 import { CsvUpload } from "@/components/csv-upload";
 import { DeleteButton } from "@/components/delete-button";
 import { EditLink } from "@/components/edit-link";
-import { QrCodeCard } from "@/components/qr-code-card";
 import {
   IconArrowLeft,
   IconCoffee,
@@ -23,7 +21,6 @@ import {
   listReviewTexts,
   updateReviewText,
 } from "@/lib/db";
-import { generateQrAssets, getScanUrl } from "@/lib/qr";
 import { avatarColor, formatDate, formatDateTime } from "@/lib/ui";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Card } from "@/components/ui/card";
@@ -57,8 +54,6 @@ export default async function ServiceDetailPage(
   const business = await getBusiness(service.business_id);
   const reviewTexts = await listReviewTexts(id);
   const scanCount = reviewTexts.reduce((sum, row) => sum + row.used_count, 0);
-  const scanUrl = getScanUrl(service.qr_slug);
-  const qrAssets = await generateQrAssets(scanUrl);
   const colors = avatarColor(service._id);
 
   const sortedByLastUsed = [...reviewTexts].sort((a, b) => {
@@ -126,13 +121,6 @@ export default async function ServiceDetailPage(
               </Badge>
             </div>
             <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-muted-foreground">
-              <Link
-                href={`/r/${service.qr_slug}`}
-                className="inline-flex items-center gap-1 font-mono text-primary hover:underline"
-              >
-                /r/{service.qr_slug}
-                <IconExternal className="h-3.5 w-3.5" />
-              </Link>
               {business ? (
                 <span className="inline-flex items-center gap-1.5">
                   Part of
@@ -148,18 +136,6 @@ export default async function ServiceDetailPage(
             </div>
           </div>
         </div>
-
-        <Card className="border-primary/20 bg-primary/5 p-4 lg:min-w-[320px]">
-          <p className="text-xs font-semibold uppercase tracking-wide text-primary">
-            QR Link (Permanent)
-          </p>
-          <div className="mt-2 flex items-center gap-2 rounded-xl border border-border bg-card px-3 py-2">
-            <p className="min-w-0 flex-1 truncate font-mono text-xs text-foreground">
-              {scanUrl}
-            </p>
-            <CopyButtonInline value={scanUrl} />
-          </div>
-        </Card>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
@@ -217,16 +193,8 @@ export default async function ServiceDetailPage(
         })}
       </div>
 
-      <div className={cn("grid gap-5", isAdmin ? "lg:grid-cols-3" : "lg:grid-cols-1")}>
-        <QrCodeCard
-          scanUrl={scanUrl}
-          pngDataUrl={qrAssets.pngDataUrl}
-          svg={qrAssets.svg}
-          serviceName={service.name}
-        />
-
-        {isAdmin && (
-          <>
+      {isAdmin && (
+        <div className="grid gap-5 lg:grid-cols-2">
             <Card className="p-5">
               <div className="flex items-center justify-between">
                 <h2 className="text-base font-bold text-foreground">Review Pool</h2>
@@ -287,15 +255,15 @@ export default async function ServiceDetailPage(
               </div>
               <Link
                 href={`/r/${service.qr_slug}`}
+                prefetch={false}
                 className={cn(buttonVariants({ variant: "outline" }), "mt-6 w-full inline-flex items-center justify-center gap-1.5")}
               >
                 Preview Public Page
                 <IconExternal className="h-3.5 w-3.5" />
               </Link>
             </Card>
-          </>
-        )}
-      </div>
+        </div>
+      )}
 
       <Card className="border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
@@ -306,6 +274,7 @@ export default async function ServiceDetailPage(
         </div>
         <Link
           href={`/r/${service.qr_slug}`}
+          prefetch={false}
           className={cn(buttonVariants({ variant: "default" }), "inline-flex items-center gap-1.5")}
         >
           Preview Public Page

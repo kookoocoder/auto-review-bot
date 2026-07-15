@@ -9,8 +9,8 @@ export function getAppBaseUrl() {
   );
 }
 
-export function getScanUrl(qrSlug: string) {
-  return `${getAppBaseUrl()}/r/${qrSlug}`;
+export function getBusinessScanUrl(businessId: string) {
+  return `${getAppBaseUrl()}/b/${businessId}`;
 }
 
 export async function generateQrAssets(scanUrl: string) {

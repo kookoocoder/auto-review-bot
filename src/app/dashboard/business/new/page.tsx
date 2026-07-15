@@ -153,7 +153,7 @@ export default async function NewBusinessPage({
             <ul className="space-y-2.5 text-sm text-muted-foreground">
               {[
                 "You can add services after creating your business",
-                "Each service will have its own QR code",
+                "Your business will have one QR code for all services",
                 "You can edit details anytime",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-2">

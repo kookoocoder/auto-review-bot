@@ -34,6 +34,35 @@ export const getById = query({
   },
 });
 
+export const getPublicProfile = query({
+  args: { id: v.string() },
+  handler: async (ctx, args) => {
+    const businessId = ctx.db.normalizeId("businesses", args.id);
+    if (!businessId) return null;
+
+    const business = await ctx.db.get(businessId);
+    if (!business) return null;
+
+    const services = await ctx.db
+      .query("services")
+      .withIndex("by_business", (q) => q.eq("business_id", businessId))
+      .order("asc")
+      .collect();
+
+    return {
+      business: {
+        _id: business._id,
+        name: business.name,
+      },
+      services: services.map((service) => ({
+        _id: service._id,
+        name: service.name,
+        qr_slug: service.qr_slug,
+      })),
+    };
+  },
+});
+
 export const update = mutation({
   args: {
     id: v.id("businesses"),
